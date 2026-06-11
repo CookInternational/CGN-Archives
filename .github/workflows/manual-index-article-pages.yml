@@ -1,0 +1,96 @@
+name: Manually index CGN Archives article pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: archives-manual-article-indexing
+  cancel-in-progress: false
+
+env:
+  CGN_API_URL: 'https://script.google.com/macros/s/AKfycbx41mQg-Ine3XZ-VrMI_SaQn4_K6cDQHA0cBFyGPgupu_edNFoNRjSLv2hoSe_bOytt/exec'
+  NODE_VERSION: '24'
+
+jobs:
+  index-article-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Verify required files and public API configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${CGN_API_URL:-}" in
+            https://script.google.com/macros/s/*/exec) ;;
+            *)
+              echo "ERROR: CGN_API_URL is missing or is not the public Apps Script web-app URL."
+              exit 1
+              ;;
+          esac
+          test -f scripts/build-archive-pages.mjs
+          test -f scripts/validate-static-pages.mjs
+          test -f assets/archive-article-runtime.js
+          test -f 404.html
+
+      - name: Index News, Weather and Sports article pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/build-archive-pages.mjs
+
+      - name: Validate indexed article pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/validate-static-pages.mjs
+
+      - name: Verify required generated index files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s sitemap.xml
+          test -s news-sitemap.xml
+          test -s robots.txt
+          grep -Fq 'https://archives.cgnnews.net/' sitemap.xml
+          grep -Fq 'Sitemap: https://archives.cgnnews.net/sitemap.xml' robots.txt
+          grep -Fq 'Sitemap: https://archives.cgnnews.net/news-sitemap.xml' robots.txt
+
+      - name: Stage indexed article output
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo 'No article indexing changes.'
+          else
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+            git status --short
+          fi
+
+      - name: Commit and push indexed article output
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          git config user.name 'CGN Archives Article Indexer'
+          git config user.email 'actions@users.noreply.github.com'
+          git commit -m 'Manually refresh CGN Archives article pages'
+          git push origin "HEAD:${TARGET_BRANCH}"

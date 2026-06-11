@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>CGN Sports Archives</title>
+<meta content="Browse archived CGN Sports highlights, Indianapolis and Chicagoland teams, and Indiana college sports coverage." name="description"/>
+<meta content="index, follow, max-image-preview:large" name="robots"/>
+<link href="https://archives.cgnnews.net/sports/" rel="canonical"/>
+<link href="/favicon.ico" rel="icon" sizes="any"/>
+<link href="/favicon-48x48.png" rel="icon" sizes="48x48" type="image/png"/>
+<link href="/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png"/>
+<link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/site.webmanifest" rel="manifest"/>
+<link href="/favicon.ico" rel="shortcut icon"/>
+<meta content="#07172f" name="theme-color"/>
+<meta content="website" property="og:type"/>
+<meta content="CGN News" property="og:site_name"/>
+<meta content="CGN Sports Archives" property="og:title"/>
+<meta content="Browse archived CGN Sports highlights, Indianapolis and Chicagoland teams, and Indiana college sports coverage." property="og:description"/>
+<meta content="https://archives.cgnnews.net/sports/" property="og:url"/>
+<meta content="https://archives.cgnnews.net/sports/CGNSportsCenterBanner01.png" property="og:image"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="CGN Sports Archives" name="twitter:title"/>
+<meta content="Browse archived CGN Sports highlights, Indianapolis and Chicagoland teams, and Indiana college sports coverage." name="twitter:description"/>
+<meta content="https://archives.cgnnews.net/sports/CGNSportsCenterBanner01.png" name="twitter:image"/>
+<link as="image" fetchpriority="high" href="/sports/CGNSportsCenterBanner01.webp" rel="preload" type="image/webp"/>
+<link href="/assets/archive.css" rel="stylesheet"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"CGN News Archives","url":"https://archives.cgnnews.net/","publisher":{"@type":"NewsMediaOrganization","name":"CGN News","alternateName":"Cook Global News Network","url":"https://www.cgnnews.net/","logo":"https://archives.cgnnews.net/favicon-96x96.png"},"potentialAction":{"@type":"SearchAction","target":"https://archives.cgnnews.net/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+<script src="/assets/archive-filter-router.js"></script>
+</head>
+<body data-archive-category="Sports">
+<div id="cgn-site-header"></div>
+<main class="archive-shell">
+<section aria-label="CGN Sports Archives" class="archive-hero" style='--archive-hero-image:url("/sports/CGNSportsCenterBanner01.webp") center/cover no-repeat;'>
+<div class="archive-hero-content">
+<div class="archive-kicker">CGN Archives</div>
+<h1>Sports Archives</h1>
+<p>Browse long-term CGN Sports coverage preserved from the live Archives sheet.</p>
+<div class="archive-actions">
+<a href="https://www.cgnnews.net/">Current News</a>
+<a href="https://www.cgnnews.net/weather/">Weather Center</a>
+<a href="https://www.cgnnews.net/sports/">Sports Center</a>
+</div>
+</div>
+</section>
+<section aria-label="Archive sections" class="archive-category-cards">
+<a class="archive-card-link" href="/news/"><img alt="CGN News archives" decoding="async" height="724" loading="lazy" src="/news/CGNNewsDesk01.webp" width="2172"/><div class="archive-card-body"><h2>News Archives</h2><p>World, Politics, Business, Markets, Technology, Entertainment, Environment, Energy, Opinion, Local, Investigations, and Special Reports.</p></div></a>
+<a class="archive-card-link" href="/weather/"><img alt="CGN Weather archives" decoding="async" height="724" loading="lazy" src="/weather/CGNWeatherCenterBanner01.webp" width="2172"/><div class="archive-card-body"><h2>Weather Archives</h2><p>Daily weather coverage, severe weather alerts, preparedness, and weather explainers.</p></div></a>
+<a class="archive-card-link" href="/sports/"><img alt="CGN Sports archives" decoding="async" height="887" loading="lazy" src="/sports/CGNSportsCenterBanner01.webp" width="1774"/><div class="archive-card-body"><h2>Sports Archives</h2><p>Sports highlights, Indianapolis and Chicagoland teams, and Indiana college sports coverage.</p></div></a>
+</section>
+<section aria-label="Search archives" class="archive-panel">
+<div class="archive-search-row">
+<input autocomplete="off" id="archiveSearch" placeholder="Search archived articles by title, category, reporter, tag, or keyword" type="search"/>
+<select aria-label="Filter archives by year" id="archiveYear"><option value="">All Years</option></select>
+<select aria-label="Filter archives by category" id="archiveCategory"><option value="">All Categories</option></select>
+<button id="archiveClear" type="button">Clear</button>
+</div>
+<div class="archive-note">Source of truth: the live CGN Archives Google Sheet, read through Apps Script. Weather articles keep /weather/YYYY/MM/DD/slug/ and Sports articles keep /sports/YYYY/MM/DD/slug/ on this archive domain.</div>
+</section>
+<section aria-labelledby="archive-feed-title">
+<div class="archive-section-title"><h2 id="archive-feed-title">Archived Coverage</h2><span id="archiveCount">Loading archives...</span></div>
+<div id="archiveFeed"><div class="archive-empty">Loading CGN News archives from the live Archives sheet...</div></div>
+<div class="archive-load-wrap"><button id="archiveLoadMore" type="button">Load More Archived Stories</button></div>
+</section>
+</main>
+<div id="cgn-site-footer"></div>
+<script src="/assets/cgn-shell.js"></script>
+<script>
+(function(){
+  "use strict";
+
+const CGN_ARCHIVE_API = "https://script.google.com/macros/s/AKfycbx41mQg-Ine3XZ-VrMI_SaQn4_K6cDQHA0cBFyGPgupu_edNFoNRjSLv2hoSe_bOytt/exec";
+const CGN_MAIN_SITE = "https://www.cgnnews.net";
+const PAGE_SIZE = 24;
+const MIN_ARCHIVE_YEAR = 2026;
+const fixedCategory = document.body.dataset.archiveCategory || "";
+const CANONICAL_CATEGORIES = [
+  "World", "Politics", "Business", "Markets", "Technology", "Entertainment", "Environment", "Energy", "Opinion", "Local", "Religion & Spirituality", "Weather", "Sports", "Investigations", "Special Reports"
+];
+let state = {
+  articles: [],
+  total: 0,
+  nextOffset: null,
+  loading: false,
+  requestId: 0,
+  q: "",
+  year: "",
+  category: fixedCategory || "",
+};
+
+function safeText(value){ return String(value || "").replace(/[&<>\"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c])); }
+function safeUrl(value, fallback){
+  const raw = String(value || "").trim();
+  if(!raw) return fallback || "#";
+  if(raw.startsWith("/") || /^https?:\/\//i.test(raw) || /^mailto:/i.test(raw)) return raw.replace(/[\"'<>]/g, "");
+  return fallback || "#";
+}
+function slugify(value){ return String(value || "").toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9\s-]/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").replace(/^-+|-+$/g,"") || "article"; }
+function categorySlug(category){
+  const raw = String(category || "News").trim();
+  const lower = raw.toLowerCase().replace(/&amp;/g,"&").replace(/[^a-z0-9&]+/g," ").replace(/\s+/g," ").trim();
+  const map = {
+    "special reports":"special-reports",
+    "cgn special report":"special-reports",
+    "investigations":"investigations",
+    "cgn investigates":"investigations",
+    "religion spirituality":"religion-and-spirituality",
+    "religion & spirituality":"religion-and-spirituality",
+    "weather":"weather",
+    "sports":"sports"
+  };
+  return map[lower] || slugify(raw);
+}
+function authorSlug(author){
+  const clean = String(author || "CGN News Staff").trim() || "CGN News Staff";
+  if(/^cgn\s+news(\s+staff)?$/i.test(clean)) return "cgn-news-staff";
+  if(/^michael\s+a\.?\s+cook$/i.test(clean)) return "michael-a-cook";
+  return slugify(clean);
+}
+function categoryUrl(category){ return CGN_MAIN_SITE + "/category/" + categorySlug(category || "News") + "/"; }
+function authorUrl(author){ return CGN_MAIN_SITE + "/reporters/" + authorSlug(author || "CGN News Staff") + "/"; }
+function categoryLink(category){ const label = category || "News"; return `<a class="archive-meta-link" href="${safeText(categoryUrl(label))}">${safeText(label)}</a>`; }
+function authorLink(author){ const label = author || "CGN News Staff"; return `<a class="archive-meta-link" href="${safeText(authorUrl(label))}">${safeText(label)}</a>`; }
+function getDate(article){ const raw = article.published_at || article.updated_at || article.created_at || ""; const d = new Date(raw); return isNaN(d.getTime()) ? null : d; }
+function pad(n){ return String(n).padStart(2,"0"); }
+function monthName(month){ const index = Math.max(0, Math.min(11, Number(month || 1) - 1)); return ["January","February","March","April","May","June","July","August","September","October","November","December"][index]; }
+function visibleDate(article){ const d = getDate(article); if(!d) return ""; return String(d.getUTCDate()) + " " + monthName(d.getUTCMonth()+1) + " " + d.getUTCFullYear(); }
+function routeFor(article){
+  const explicit = String(article.archive_url || article.canonical_url || article.url || "").trim();
+  if(explicit) return explicit.replace(/^https?:\/\/www\.cgnnews\.net/i, "").replace(/^https?:\/\/archives\.cgnnews\.net/i, "") || "/";
+  const d = getDate(article) || new Date();
+  const category = String(article.category || "").toLowerCase();
+  const family = category === "weather" ? "weather" : category === "sports" ? "sports" : "news";
+  return `/${family}/${d.getUTCFullYear()}/${pad(d.getUTCMonth()+1)}/${pad(d.getUTCDate())}/${slugify(article.slug || article.title)}/`;
+}
+function articleParts(article){ const d = getDate(article) || new Date(0); return { year:String(article.year || d.getUTCFullYear()), month:String(article.month || pad(d.getUTCMonth()+1)).padStart(2,"0"), day:String(article.day || pad(d.getUTCDate())).padStart(2,"0") }; }
+function apiUrl(action, params){ const url = new URL(CGN_ARCHIVE_API); url.searchParams.set("action", action); Object.keys(params || {}).forEach(k => { if(params[k] !== undefined && params[k] !== null && params[k] !== "") url.searchParams.set(k, params[k]); }); return url.toString(); }
+function loadJsonp(action, params){
+  return new Promise((resolve, reject) => {
+    const cb = "cgnArchiveCb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+    const script = document.createElement("script");
+    const url = new URL(CGN_ARCHIVE_API);
+    url.searchParams.set("action", action);
+    Object.keys(params || {}).forEach(k => { if(params[k] !== undefined && params[k] !== null && params[k] !== "") url.searchParams.set(k, params[k]); });
+    url.searchParams.set("callback", cb);
+    window[cb] = function(data){ cleanup(); resolve(data); };
+    function cleanup(){ try{ delete window[cb]; }catch(e){ window[cb] = undefined; } if(script.parentNode) script.parentNode.removeChild(script); }
+    script.onerror = function(){ cleanup(); reject(new Error("Archive API JSONP load failed.")); };
+    script.src = url.toString();
+    document.head.appendChild(script);
+  });
+}
+async function loadApi(action, params){
+  try {
+    const res = await fetch(apiUrl(action, params), { cache:"no-store" });
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    return await res.json();
+  } catch(err) {
+    return loadJsonp(action, params);
+  }
+}
+function renderCard(article){
+  const url = safeUrl(routeFor(article), "/");
+  const image = safeUrl(article.hero_image_url || article.image || "/news/CGNNewsDesk01.webp", "/news/CGNNewsDesk01.webp");
+  const title = article.title || "Untitled";
+  const meta = `${categoryLink(article.category || "News")} · ${safeText(visibleDate(article))} · ${authorLink(article.author || "CGN News Staff")}`;
+  return `<article class="archive-article"><a class="archive-thumb" href="${safeText(url)}"><img src="${safeText(image)}" alt="${safeText(title || "CGN News archived article")}" loading="lazy"></a><div class="archive-article-body"><div class="archive-meta">${meta}</div><h3><a class="archive-title-link" href="${safeText(url)}">${safeText(title)}</a></h3><p>${safeText(article.summary || article.subtitle || "")}</p></div></article>`;
+}
+function groupedHtml(articles){
+  if(!articles.length) return '<div class="archive-empty">No archived stories found. The archive is searching the full live Archives sheet, not a local 500-story cache.</div>';
+  const groups = {};
+  articles.forEach(article => { const p = articleParts(article); const key = `${p.year}-${p.month}-${p.day}`; if(!groups[key]) groups[key] = []; groups[key].push(article); });
+  return Object.keys(groups).sort().reverse().map(key => {
+    const [year, month, day] = key.split("-");
+    return `<section class="archive-day"><h4>${Number(day)} ${monthName(month)} ${year}</h4><div class="archive-grid">${groups[key].map(renderCard).join("")}</div></section>`;
+  }).join("");
+}
+function populateFilters(){
+  const yearSelect = document.getElementById("archiveYear");
+  const catSelect = document.getElementById("archiveCategory");
+  if(yearSelect){
+    const currentYear = Math.max(MIN_ARCHIVE_YEAR, new Date().getUTCFullYear());
+    const resultYears = Array.from(new Set(state.articles.map(a => articleParts(a).year).filter(y => Number(y) >= MIN_ARCHIVE_YEAR)));
+    const generatedYears = Array.from({length: Math.max(1, currentYear - MIN_ARCHIVE_YEAR + 1)}, (_, i) => String(currentYear - i));
+    const years = Array.from(new Set([...resultYears, ...generatedYears])).sort((a,b) => Number(b) - Number(a));
+    const previous = yearSelect.value || state.year;
+    yearSelect.innerHTML = '<option value="">All Years</option>' + years.map(y => `<option value="${safeText(y)}">${safeText(y)}</option>`).join("");
+    yearSelect.value = previous;
+  }
+  if(catSelect){
+    if(fixedCategory){
+      catSelect.innerHTML = `<option value="${safeText(fixedCategory)}">${safeText(fixedCategory)}</option>`;
+      catSelect.value = fixedCategory;
+      catSelect.disabled = true;
+    } else {
+      const previous = catSelect.value || state.category;
+      catSelect.innerHTML = '<option value="">All Categories</option>' + CANONICAL_CATEGORIES.map(c => `<option value="${safeText(c)}">${safeText(c)}</option>`).join("");
+      catSelect.value = previous;
+    }
+  }
+}
+function setLoading(isLoading, append){
+  state.loading = isLoading;
+  const more = document.getElementById("archiveLoadMore");
+  if(more){ more.disabled = isLoading; more.textContent = isLoading ? "Loading..." : "Load More Archived Stories"; }
+  const count = document.getElementById("archiveCount");
+  if(count && isLoading && !append) count.textContent = "Loading archive...";
+  const feed = document.getElementById("archiveFeed");
+  if(feed && isLoading && !append) feed.innerHTML = '<div class="archive-empty archive-loading">Loading archive from the full live Archives sheet...</div>';
+}
+function renderResults(){
+  const feed = document.getElementById("archiveFeed");
+  const count = document.getElementById("archiveCount");
+  const more = document.getElementById("archiveLoadMore");
+  if(feed) feed.innerHTML = groupedHtml(state.articles);
+  const total = Number(state.total || 0);
+  const shown = state.articles.length;
+  if(count){
+    const term = state.q ? ` matching “${state.q}”` : "";
+    count.textContent = `${shown} of ${total} archived stor${total===1?'y':'ies'}${term} from the live Archives sheet`;
+  }
+  if(more){ more.style.display = state.nextOffset !== null && state.nextOffset !== undefined ? "inline-flex" : "none"; }
+}
+function currentParams(offset){
+  const params = { limit: PAGE_SIZE, offset: offset || 0, min_year: MIN_ARCHIVE_YEAR };
+  if(state.q) params.q = state.q;
+  if(state.year) params.year = state.year;
+  const category = fixedCategory || state.category;
+  if(category) params.category = category;
+  return params;
+}
+async function fetchArchivePage(options){
+  options = options || {};
+  const append = !!options.append;
+  if(append && state.loading) return;
+  const requestId = ++state.requestId;
+  setLoading(true, append);
+  try {
+    const offset = append ? state.nextOffset : 0;
+    const data = await loadApi("archive_live_index", currentParams(offset || 0));
+    if(requestId !== state.requestId) return;
+    if(!data || data.success === false) throw new Error((data && data.error) || "Archive API returned no data.");
+    const incoming = (Array.isArray(data.articles) ? data.articles : []).filter(article => Number(articleParts(article).year) >= MIN_ARCHIVE_YEAR);
+    state.articles = append ? state.articles.concat(incoming) : incoming;
+    state.total = Number(data.total || incoming.length || 0);
+    state.nextOffset = (data.next_offset === null || typeof data.next_offset === "undefined" || data.next_offset === "") ? null : Number(data.next_offset);
+    populateFilters();
+    renderResults();
+  } catch(err) {
+    const feed = document.getElementById("archiveFeed");
+    if(feed) feed.innerHTML = `<div class="archive-empty"><strong>Archive API error:</strong> ${safeText(err.message || err)}<br>The archive frontend is configured to search the full live Archives sheet through Apps Script.</div>`;
+    const count = document.getElementById("archiveCount"); if(count) count.textContent = "Archive load failed";
+    const more = document.getElementById("archiveLoadMore"); if(more) more.style.display = "none";
+  } finally {
+    if(requestId === state.requestId) setLoading(false, true);
+  }
+}
+function debounce(fn, wait){ let timer = null; return function(){ clearTimeout(timer); timer = setTimeout(fn, wait); }; }
+function refreshFromControls(){
+  const search = document.getElementById("archiveSearch");
+  const year = document.getElementById("archiveYear");
+  const category = document.getElementById("archiveCategory");
+  state.q = search ? search.value.trim() : "";
+  state.year = year ? year.value : "";
+  state.category = fixedCategory || (category ? category.value : "");
+  state.articles = [];
+  state.nextOffset = null;
+  fetchArchivePage({ append:false });
+}
+function applyUrlParams(){
+  const params = new URLSearchParams(location.search);
+  const q = (params.get("q") || params.get("s") || "").trim();
+  const requestedYear = (params.get("year") || "").trim();
+  const requestedCategory = (params.get("category") || "").trim();
+  const search = document.getElementById("archiveSearch");
+  const year = document.getElementById("archiveYear");
+  const category = document.getElementById("archiveCategory");
+  if(search && q){ search.value = q; state.q = q; }
+  if(year && requestedYear && Number(requestedYear) >= MIN_ARCHIVE_YEAR){ year.value = requestedYear; state.year = requestedYear; }
+  if(category && !fixedCategory && requestedCategory){ category.value = requestedCategory; state.category = requestedCategory; }
+}
+function wireArchiveControls(){
+  const debouncedSearch = debounce(refreshFromControls, 300);
+  const search = document.getElementById("archiveSearch"); if(search) search.addEventListener("input", debouncedSearch);
+  const year = document.getElementById("archiveYear"); if(year) year.addEventListener("change", refreshFromControls);
+  const category = document.getElementById("archiveCategory"); if(category && !fixedCategory) category.addEventListener("change", refreshFromControls);
+  const clear = document.getElementById("archiveClear");
+  if(clear) clear.addEventListener("click", () => {
+    if(search) search.value = "";
+    if(year) year.value = "";
+    if(category && !fixedCategory) category.value = "";
+    state.q = ""; state.year = ""; state.category = fixedCategory || ""; state.articles = []; state.nextOffset = null;
+    fetchArchivePage({ append:false });
+  });
+  const more = document.getElementById("archiveLoadMore"); if(more) more.addEventListener("click", () => { if(state.nextOffset !== null && !state.loading) fetchArchivePage({ append:true }); });
+}
+
+  populateFilters();
+  applyUrlParams();
+  wireArchiveControls();
+  fetchArchivePage({ append:false });
+})();
+
+</script>
+<script defer="" src="/assets/js/cgn-archive-v106.js"></script></body>
+</html>

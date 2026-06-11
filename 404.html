@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,follow">
+  <title>Page Not Found | CGN Archives</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="/assets/archive.css">
+  <style>
+    .archive-404-shell {
+      width: min(960px, calc(100% - 32px));
+      margin: 48px auto;
+    }
+    .archive-404-card,
+    .archive-fallback-story {
+      background: #fff;
+      border: 1px solid var(--line, #d0d5dd);
+      box-shadow: 0 18px 42px rgba(7, 23, 47, .12);
+      padding: clamp(22px, 4vw, 44px);
+    }
+    .archive-404-card { text-align: center; }
+    .archive-404-card h1,
+    .archive-fallback-story h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(34px, 5.2vw, 62px);
+      line-height: 1.05;
+      margin: 8px 0 14px;
+    }
+    .archive-404-card p,
+    .archive-service-error p { line-height: 1.65; }
+    .archive-404-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .archive-404-nav a {
+      border: 1px solid currentColor;
+      color: inherit;
+      padding: 10px 14px;
+      text-decoration: none;
+    }
+    .archive-404-nav a:hover,
+    .archive-404-nav a:focus { text-decoration: underline; }
+    .archive-fallback-story .archive-subtitle {
+      color: #475467;
+      font-size: 20px;
+      line-height: 1.45;
+    }
+    .archive-fallback-story .archive-meta {
+      color: #667085;
+      margin: 14px 0 20px;
+    }
+    .archive-fallback-story figure { margin: 24px 0; }
+    .archive-fallback-story img {
+      display: block;
+      max-height: 540px;
+      object-fit: cover;
+      width: 100%;
+    }
+    .archive-fallback-story figcaption {
+      color: #667085;
+      font-size: 12px;
+      margin-top: 7px;
+    }
+    .archive-fallback-story .archive-body,
+    .archive-fallback-story .archive-analysis {
+      font-size: 18px;
+      line-height: 1.72;
+    }
+    .archive-fallback-story .archive-analysis {
+      border-top: 1px solid var(--line, #d0d5dd);
+      margin-top: 28px;
+      padding-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="cgn-site-header"></div>
+  <main class="archive-404-shell" id="archive404Mount" aria-live="polite"></main>
+  <div id="cgn-site-footer"></div>
+
+  <script src="/assets/cgn-shell.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      var API_URL = "https://script.google.com/macros/s/AKfycbx41mQg-Ine3XZ-VrMI_SaQn4_K6cDQHA0cBFyGPgupu_edNFoNRjSLv2hoSe_bOytt/exec";
+      var ARCHIVE_ORIGIN = "https://archives.cgnnews.net";
+      var SECTIONS = new Set(["news", "weather", "sports"]);
+      var LANGUAGES = new Set([
+        "en", "fr", "es", "de", "it", "pt", "pt-br", "pl", "ro", "nl", "uk",
+        "zh-hant", "zh-hans", "fil", "ceb", "hi", "mr"
+      ]);
+      var mount = document.getElementById("archive404Mount");
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, function (character) {
+          return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character];
+        });
+      }
+
+      function safeUrl(value, fallback) {
+        var raw = String(value || "").trim();
+        if (/^https?:\/\//i.test(raw) || raw.charAt(0) === "/") {
+          return raw.replace(/["'<>]/g, "");
+        }
+        return fallback;
+      }
+
+      function normalizedPath(pathname) {
+        var value = String(pathname || "/").replace(/\/{2,}/g, "/");
+        if (value.charAt(0) !== "/") value = "/" + value;
+        if (value !== "/" && !value.endsWith("/")) value += "/";
+        return value;
+      }
+
+      function removeObsoleteLanguagePrefix(pathname) {
+        var parts = normalizedPath(pathname).split("/").filter(Boolean);
+        var changed = false;
+
+        if (parts.length && LANGUAGES.has(parts[0].toLowerCase())) {
+          parts.shift();
+          changed = true;
+        }
+
+        return {
+          changed: changed,
+          path: normalizedPath("/" + parts.join("/"))
+        };
+      }
+
+      function parseArchiveArticlePath(pathname) {
+        var parts = normalizedPath(pathname).split("/").filter(Boolean);
+        if (parts.length !== 5) return null;
+
+        var section = parts[0].toLowerCase();
+        var year = parts[1];
+        var month = parts[2];
+        var day = parts[3];
+        var slug = parts[4];
+
+        if (!SECTIONS.has(section)) return null;
+        if (!/^\d{4}$/.test(year) || !/^\d{2}$/.test(month) || !/^\d{2}$/.test(day)) return null;
+        if (!slug || !/^[a-z0-9][a-z0-9-]*$/i.test(slug)) return null;
+
+        return {
+          section: section,
+          year: year,
+          month: month,
+          day: day,
+          slug: slug,
+          path: normalizedPath(pathname)
+        };
+      }
+
+      function showNotFound() {
+        mount.innerHTML =
+          '<section class="archive-404-card">' +
+            '<p><strong>CGN Archives</strong></p>' +
+            '<h1>Page Not Found</h1>' +
+            '<p>The requested archive page does not exist at this address.</p>' +
+            '<nav class="archive-404-nav" aria-label="CGN Archives navigation">' +
+              '<a href="/">All Archives</a>' +
+              '<a href="/news/">News</a>' +
+              '<a href="/weather/">Weather</a>' +
+              '<a href="/sports/">Sports</a>' +
+              '<a href="https://www.cgnnews.net/">CGN News</a>' +
+            '</nav>' +
+          '</section>';
+      }
+
+      function showServiceError(message) {
+        mount.innerHTML =
+          '<section class="archive-404-card archive-service-error">' +
+            '<p><strong>CGN Archives</strong></p>' +
+            '<h1>Archive Temporarily Unavailable</h1>' +
+            '<p>' + escapeHtml(message || "The archive service could not load this article.") + '</p>' +
+            '<nav class="archive-404-nav" aria-label="CGN Archives navigation">' +
+              '<a href="/">All Archives</a>' +
+              '<a href="/news/">News</a>' +
+              '<a href="/weather/">Weather</a>' +
+              '<a href="/sports/">Sports</a>' +
+            '</nav>' +
+          '</section>';
+      }
+
+      function apiUrl(action, parameters) {
+        var url = new URL(API_URL);
+        url.searchParams.set("action", action);
+        Object.keys(parameters || {}).forEach(function (key) {
+          if (parameters[key] !== "" && parameters[key] != null) {
+            url.searchParams.set(key, parameters[key]);
+          }
+        });
+        return url.toString();
+      }
+
+      function loadJsonp(action, parameters) {
+        return new Promise(function (resolve, reject) {
+          var callbackName = "cgnArchive404_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+          var script = document.createElement("script");
+          var url = new URL(API_URL);
+          url.searchParams.set("action", action);
+          Object.keys(parameters || {}).forEach(function (key) {
+            if (parameters[key] !== "" && parameters[key] != null) {
+              url.searchParams.set(key, parameters[key]);
+            }
+          });
+          url.searchParams.set("callback", callbackName);
+
+          function cleanup() {
+            try { delete window[callbackName]; } catch (error) { window[callbackName] = undefined; }
+            if (script.parentNode) script.parentNode.removeChild(script);
+          }
+
+          window[callbackName] = function (data) {
+            cleanup();
+            resolve(data);
+          };
+          script.onerror = function () {
+            cleanup();
+            reject(new Error("Archive API JSONP request failed."));
+          };
+          script.src = url.toString();
+          document.head.appendChild(script);
+        });
+      }
+
+      async function loadApi(action, parameters) {
+        try {
+          var response = await fetch(apiUrl(action, parameters), {
+            cache: "no-store",
+            headers: { accept: "application/json" }
+          });
+          if (!response.ok) throw new Error("Archive API returned HTTP " + response.status + ".");
+          return await response.json();
+        } catch (error) {
+          return loadJsonp(action, parameters);
+        }
+      }
+
+      function articleRoute(article) {
+        var rawUrl = article.archive_url || article.canonical_url || article.url || "";
+        if (rawUrl) {
+          try { return normalizedPath(new URL(rawUrl, ARCHIVE_ORIGIN).pathname); } catch (error) { /* continue */ }
+        }
+
+        var category = String(article.category || "").trim().toLowerCase();
+        var section = category === "weather" ? "weather" : category === "sports" ? "sports" : "news";
+        var date = new Date(article.published_at || article.updated_at || "");
+        if (Number.isNaN(date.getTime())) return "";
+        var year = String(date.getUTCFullYear());
+        var month = String(date.getUTCMonth() + 1).padStart(2, "0");
+        var day = String(date.getUTCDate()).padStart(2, "0");
+        var slug = String(article.slug || "").trim();
+        if (!slug) return "";
+        return normalizedPath("/" + section + "/" + year + "/" + month + "/" + day + "/" + slug + "/");
+      }
+
+      function visibleDate(raw) {
+        var date = new Date(raw || "");
+        if (Number.isNaN(date.getTime())) return "";
+        return new Intl.DateTimeFormat("en", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "UTC"
+        }).format(date);
+      }
+
+      function renderArticle(article, expectedPath) {
+        var resolvedPath = articleRoute(article);
+        if (!resolvedPath || resolvedPath !== normalizedPath(expectedPath)) {
+          throw new Error("The archive API returned an article for a different URL.");
+        }
+
+        var title = String(article.title || "Untitled archive article");
+        var description = String(article.seo_description || article.summary || article.subtitle || title);
+        var image = safeUrl(article.hero_image_url || article.image, "/news/CGNNewsDesk01.webp");
+        var canonical = ARCHIVE_ORIGIN + normalizedPath(expectedPath);
+        var author = String(article.author || "CGN News");
+        var category = String(article.category || "News");
+        var body = article.body_html || "<p>This archived article body is not available.</p>";
+        var analysis = article.what_this_means || article.analysis || "";
+
+        document.title = String(article.seo_title || title) + " | CGN Archives";
+
+        var canonicalLink = document.createElement("link");
+        canonicalLink.rel = "canonical";
+        canonicalLink.href = canonical;
+        document.head.appendChild(canonicalLink);
+
+        var jsonLd = document.createElement("script");
+        jsonLd.type = "application/ld+json";
+        jsonLd.textContent = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "NewsArticle",
+          "@id": canonical,
+          "mainEntityOfPage": canonical,
+          "headline": title,
+          "description": description,
+          "image": [image.charAt(0) === "/" ? ARCHIVE_ORIGIN + image : image],
+          "datePublished": article.published_at || article.updated_at || "",
+          "dateModified": article.updated_at || article.published_at || "",
+          "author": { "@type": "Person", "name": author },
+          "publisher": { "@type": "NewsMediaOrganization", "name": "CGN News" },
+          "inLanguage": "en"
+        });
+        document.head.appendChild(jsonLd);
+
+        mount.innerHTML =
+          '<article class="archive-fallback-story">' +
+            '<p><strong>' + escapeHtml(category) + '</strong></p>' +
+            '<h1>' + escapeHtml(title) + '</h1>' +
+            (article.subtitle ? '<p class="archive-subtitle">' + escapeHtml(article.subtitle) + '</p>' : '') +
+            '<p class="archive-meta">By ' + escapeHtml(author) +
+              (visibleDate(article.published_at || article.updated_at) ? ' · ' + escapeHtml(visibleDate(article.published_at || article.updated_at)) : '') +
+            '</p>' +
+            '<figure><img src="' + escapeHtml(image) + '" alt="' + escapeHtml(title) + '">' +
+              '<figcaption>' + escapeHtml(article.image_credit || "CGN News") + '</figcaption></figure>' +
+            '<section class="archive-body">' + body + '</section>' +
+            (analysis ? '<section class="archive-analysis"><h2>What This Means</h2>' + analysis + '</section>' : '') +
+            '<nav class="archive-404-nav" aria-label="CGN Archives navigation"><a href="/">Back to CGN Archives</a></nav>' +
+          '</article>';
+      }
+
+      async function initialize() {
+        var compatibility = removeObsoleteLanguagePrefix(window.location.pathname);
+
+        // Compatibility only: remove an obsolete language prefix.
+        // This never redirects a missing article to another archive URL.
+        if (compatibility.changed) {
+          window.location.replace(compatibility.path + window.location.search + window.location.hash);
+          return;
+        }
+
+        var route = parseArchiveArticlePath(window.location.pathname);
+        if (!route) {
+          showNotFound();
+          return;
+        }
+
+        mount.innerHTML = '<section class="archive-404-card"><p>Loading archived article…</p></section>';
+
+        try {
+          var data = await loadApi("archive_live_article", {
+            slug: route.slug,
+            path: route.path,
+            section: route.section
+          });
+
+          if (!data || data.success === false) {
+            if (data && /not found/i.test(String(data.error || ""))) {
+              showNotFound();
+              return;
+            }
+            throw new Error((data && data.error) || "The archive API returned an invalid response.");
+          }
+
+          if (!data.article) {
+            showNotFound();
+            return;
+          }
+
+          renderArticle(data.article, route.path);
+        } catch (error) {
+          console.error("CGN Archives fallback error:", error);
+          showServiceError(error && error.message ? error.message : String(error));
+        }
+      }
+
+      initialize();
+    }());
+  </script>
+  <script defer src="/assets/js/cgn-archive-v106.js"></script>
+</body>
+</html>
