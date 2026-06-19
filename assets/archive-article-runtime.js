@@ -182,9 +182,11 @@
     var body = article.body_html || "<p>This archived article body is not available.</p>";
     var analysis = article.what_this_means || article.analysis || "";
     var published = visibleDate(article.published_at || article.updated_at);
-    var modified = visibleDate(article.updated_at);
-    var dateLine = published ? "Published " + escapeHtml(published) : "";
-    if (modified && article.updated_at && article.updated_at !== article.published_at) dateLine += (dateLine ? " · " : "") + "Updated " + escapeHtml(modified);
+    var modified = visibleDate(article.updated_at || article.published_at);
+    var dateLine = [
+      published ? "Published At: " + escapeHtml(published) : "",
+      modified ? "Last Updated At: " + escapeHtml(modified) : ""
+    ].filter(Boolean).join(" · ");
 
     mount.innerHTML =
       '<div class="archive-kicker">' + categoryLink(category) + "</div>" +
