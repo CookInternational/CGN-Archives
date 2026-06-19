@@ -263,12 +263,20 @@
       function visibleDate(raw) {
         var date = new Date(raw || "");
         if (Number.isNaN(date.getTime())) return "";
-        return new Intl.DateTimeFormat("en", {
+        var parts = new Intl.DateTimeFormat("en-US", {
           day: "numeric",
           month: "long",
           year: "numeric",
-          timeZone: "UTC"
-        }).format(date);
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "America/Indiana/Indianapolis",
+          timeZoneName: "short"
+        }).formatToParts(date);
+        var values = {};
+        parts.forEach(function (part) { values[part.type] = part.value; });
+        var period = String(values.dayPeriod || "").toUpperCase();
+        return values.day + " " + values.month + " " + values.year + " at " + values.hour + ":" + values.minute + (period ? " " + period : "") + (values.timeZoneName ? " " + values.timeZoneName : "");
       }
 
       function renderArticle(article, expectedPath) {
@@ -285,6 +293,12 @@
         var category = String(article.category || "News");
         var body = article.body_html || "<p>This archived article body is not available.</p>";
         var analysis = article.what_this_means || article.analysis || "";
+        var published = visibleDate(article.published_at || article.updated_at);
+        var modified = visibleDate(article.updated_at || article.published_at);
+        var dateLine = [
+          published ? "Published At: " + escapeHtml(published) : "",
+          modified ? "Last Updated At: " + escapeHtml(modified) : ""
+        ].filter(Boolean).join(" · ");
 
         document.title = String(article.seo_title || title) + " | CGN Archives";
 
@@ -317,7 +331,7 @@
             '<h1>' + escapeHtml(title) + '</h1>' +
             (article.subtitle ? '<p class="archive-subtitle">' + escapeHtml(article.subtitle) + '</p>' : '') +
             '<p class="archive-meta">By ' + escapeHtml(author) +
-              (visibleDate(article.published_at || article.updated_at) ? ' · ' + escapeHtml(visibleDate(article.published_at || article.updated_at)) : '') +
+              (dateLine ? ' · ' + dateLine : '') +
             '</p>' +
             '<figure><img src="' + escapeHtml(image) + '" alt="' + escapeHtml(title) + '">' +
               '<figcaption>' + escapeHtml(article.image_credit || "CGN News") + '</figcaption></figure>' +
