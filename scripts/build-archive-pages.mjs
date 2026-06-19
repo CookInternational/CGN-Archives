@@ -188,7 +188,6 @@ function articleDocument(article) {
   const modified = modifiedDate(article, published);
   const publishedIso = published.toISOString();
   const modifiedIso = modified.toISOString();
-  const showUpdated = modified.getTime() - published.getTime() >= 60_000;
   const route = articleRoute(article);
   const canonical = `${SITE}${route}`;
   const image = imageUrl(article);
@@ -231,11 +230,9 @@ function articleDocument(article) {
   };
 
   const dateLine = [
-    `Published <time datetime="${esc(publishedIso)}">${esc(formatVisibleDate(published, article))}</time>`,
-    showUpdated
-      ? `Updated <time datetime="${esc(modifiedIso)}">${esc(formatVisibleDate(modified, article))}</time>`
-      : ''
-  ].filter(Boolean).join(' · ');
+    `Published At: <time datetime="${esc(publishedIso)}">${esc(formatVisibleDate(published, article))}</time>`,
+    `Last Updated At: <time datetime="${esc(modifiedIso)}">${esc(formatVisibleDate(modified, article))}</time>`
+  ].join(' · ');
 
   return `<!doctype html>
 <html lang="en">
