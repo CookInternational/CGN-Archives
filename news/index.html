@@ -40,11 +40,15 @@
 <p>Browse long-term CGN News reporting outside Weather and Sports.</p>
 <div class="archive-actions">
 <a href="https://www.cgnnews.net/">Current News</a>
+<a href="https://www.cgnnews.net/weather/">Weather Center</a>
+<a href="https://www.cgnnews.net/sports/">Sports Center</a>
 </div>
 </div>
 </section>
 <section aria-label="Archive sections" class="archive-category-cards">
 <a class="archive-card-link" href="/news/"><img alt="CGN News archives" decoding="async" height="724" loading="lazy" src="/news/CGNNewsDesk01.webp" width="2172"/><div class="archive-card-body"><h2>News Archives</h2><p>World, Politics, Business, Markets, Technology, Entertainment, Environment, Energy, Opinion, Local, Investigations, and Special Reports.</p></div></a>
+<a class="archive-card-link" href="/weather/"><img alt="CGN Weather archives" decoding="async" height="724" loading="lazy" src="/weather/CGNWeatherCenterBanner01.webp" width="2172"/><div class="archive-card-body"><h2>Weather Archives</h2><p>Daily weather coverage, severe weather alerts, preparedness, and weather explainers.</p></div></a>
+<a class="archive-card-link" href="/sports/"><img alt="CGN Sports archives" decoding="async" height="887" loading="lazy" src="/sports/CGNSportsCenterBanner01.webp" width="1774"/><div class="archive-card-body"><h2>Sports Archives</h2><p>Sports highlights, Indianapolis and Chicagoland teams, and Indiana college sports coverage.</p></div></a>
 </section>
 <section aria-label="Search archives" class="archive-panel">
 <div class="archive-search-row">
@@ -53,7 +57,7 @@
 <select aria-label="Filter archives by category" id="archiveCategory"><option value="">All Categories</option></select>
 <button id="archiveClear" type="button">Clear</button>
 </div>
-<div class="archive-note">Source of truth: the live CGN Archives Google Sheet, read through Apps Script. This News archive excludes Weather and Sports; those sections remain on their dedicated archive pages.</div>
+<div class="archive-note">Source of truth: the live CGN Archives Google Sheet, read through Apps Script. Weather articles keep /weather/YYYY/MM/DD/slug/ and Sports articles keep /sports/YYYY/MM/DD/slug/ on this archive domain.</div>
 </section>
 <section aria-labelledby="archive-feed-title">
 <div class="archive-section-title"><h2 id="archive-feed-title">Archived Coverage</h2><span id="archiveCount">Loading archives...</span></div>
@@ -233,7 +237,7 @@ function currentParams(offset){
   if(state.year) params.year = state.year;
   if(excludedCategoryParam) params.exclude_categories = excludedCategoryParam;
   const category = fixedCategory || state.category;
-  if(category) params.category = category;
+  if(category && !isExcludedCategory(category)) params.category = category;
   return params;
 }
 async function fetchArchivePage(options){
@@ -247,11 +251,9 @@ async function fetchArchivePage(options){
     const data = await loadApi("archive_live_index", currentParams(offset || 0));
     if(requestId !== state.requestId) return;
     if(!data || data.success === false) throw new Error((data && data.error) || "Archive API returned no data.");
-    const incoming = (Array.isArray(data.articles) ? data.articles : [])
-      .filter(article => Number(articleParts(article).year) >= MIN_ARCHIVE_YEAR)
-      .filter(article => !isExcludedCategory(article.category));
+    const incoming = (Array.isArray(data.articles) ? data.articles : []).filter(article => Number(articleParts(article).year) >= MIN_ARCHIVE_YEAR && !isExcludedCategory(article.category));
     state.articles = append ? state.articles.concat(incoming) : incoming;
-    state.total = Number(data.total || incoming.length || 0);
+    state.total = Math.max(state.articles.length, Number(data.filtered_total || data.total || incoming.length || 0));
     state.nextOffset = (data.next_offset === null || typeof data.next_offset === "undefined" || data.next_offset === "") ? null : Number(data.next_offset);
     populateFilters();
     renderResults();
