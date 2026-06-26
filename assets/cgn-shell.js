@@ -23,6 +23,8 @@
 
   const CGN_API_BASE = getConfiguredApiBase_();
   const CGN_ARTICLES_URL = CGN_API_BASE + "?action=articles";
+  const CGN_MAIN_SITE = "https://www.cgnnews.net";
+  const CGN_MAIN_SITE_TRAILING = CGN_MAIN_SITE + "/";
 
   window.CGN_API_BASE = CGN_API_BASE;
   window.CGN_API_URL = CGN_API_BASE;
@@ -216,7 +218,7 @@ function getShellLoginInput_(id){
         </div>
 
         <p class="cgn-shell-login-reset">
-          <a href="/reset-password/">Forgot Password?</a>
+          <a href="https://www.cgnnews.net/reset-password/">Forgot Password?</a>
         </p>
 
         <button type="button" class="cgn-shell-login-close" onclick="closeLogin()">Close</button>
@@ -695,16 +697,12 @@ function getShellLoginInput_(id){
     const existingUrl = String(article && (article.url || article.canonical_url) || "").trim();
 
     if(existingUrl){
-      let archivePath = existingUrl
-        .replace(/^https?:\/\/(?:www\.)?cgnnews\.net/i, "")
-        .replace(/^https?:\/\/archives\.cgnnews\.net/i, "");
-
-      if(archivePath && archivePath.charAt(0) === "/"){
-        return archivePath.endsWith("/") ? archivePath : archivePath + "/";
+      if(/^https?:\/\//i.test(existingUrl)){
+        return existingUrl;
       }
 
-      if(!/^https?:\/\//i.test(existingUrl)){
-        return existingUrl.endsWith("/") ? existingUrl : existingUrl + "/";
+      if(existingUrl.charAt(0) === "/"){
+        return CGN_MAIN_SITE + (existingUrl.endsWith("/") ? existingUrl : existingUrl + "/");
       }
     }
 
@@ -718,7 +716,7 @@ function getShellLoginInput_(id){
     const month = String(date.getUTCMonth() + 1).padStart(2, "0");
     const day = String(date.getUTCDate()).padStart(2, "0");
 
-    return `/${route}/${year}/${month}/${day}/${slug}/`;
+    return `${CGN_MAIN_SITE}/${route}/${year}/${month}/${day}/${slug}/`;
   }
 
   function startShellHeadlineTicker(articles){
@@ -728,7 +726,7 @@ function getShellLoginInput_(id){
     const tickerArticles = Array.isArray(articles) ? sortNewestFirst(articles) : [];
 
     if(!tickerArticles.length){
-      ticker.innerHTML = `<a href="/news/">BREAKING: CGN News</a>`;
+      ticker.innerHTML = `<a href="https://www.cgnnews.net/news/">BREAKING: CGN News</a>`;
       return;
     }
 
@@ -757,7 +755,7 @@ function getShellLoginInput_(id){
       const data = await res.json();
       startShellHeadlineTicker(Array.isArray(data) ? data : []);
     } catch(e){
-      ticker.innerHTML = `<a href="/news/">BREAKING: CGN News</a>`;
+      ticker.innerHTML = `<a href="https://www.cgnnews.net/news/">BREAKING: CGN News</a>`;
     }
   }
 
@@ -769,7 +767,7 @@ function getShellLoginInput_(id){
   function editorPenHtml(){
     if(!shouldShowEditorPen()) return "";
     return `
-      <a href="/editor" class="editor-portal-link" aria-label="Open CGN Editor Portal">
+      <a href="https://www.cgnnews.net/editor" class="editor-portal-link" aria-label="Open CGN Editor Portal">
         <span class="editor-portal-pen" aria-hidden="true"></span>
         <span class="editor-portal-text">EDITOR LOGIN</span>
       </a>
@@ -778,7 +776,7 @@ function getShellLoginInput_(id){
 
   function supportHelpHtml(){
     return `
-      <a href="/support/" class="cgn-help-link" aria-label="Open CGN Technical Support">
+      <a href="https://www.cgnnews.net/support/" class="cgn-help-link" aria-label="Open CGN Technical Support">
         <span class="cgn-help-mark" aria-hidden="true">?</span>
         <span class="cgn-help-text">Help?</span>
       </a>
@@ -792,8 +790,8 @@ function getShellLoginInput_(id){
     mount.innerHTML = `
       <header class="top-bar">
 
-        <a href="/" class="brand-link" aria-label="CGN News homepage">
-          <img src="/CGNNewsLogo01.png" class="logo" alt="CGN News">
+        <a href="https://www.cgnnews.net/" class="brand-link" aria-label="CGN News homepage">
+          <img src="https://www.cgnnews.net/CGNNewsLogo01.png" class="logo" alt="CGN News">
           <span class="network-name">Cook Global News Network</span>
         </a>
 
@@ -827,7 +825,7 @@ function getShellLoginInput_(id){
           <span class="account-wrap">
             <a href="#" id="account-btn">Login</a>
             <span id="account-menu" class="account-menu" aria-label="Account menu">
-              <a href="/account">Account</a>
+              <a href="https://www.cgnnews.net/account">Account</a>
               <button type="button" id="account-logout-btn">Logout</button>
             </span>
           </span>
@@ -858,7 +856,7 @@ function getShellLoginInput_(id){
           </a>
 
           <a id="sports-center-link" class="sports-center-link" href="/sports/" aria-label="CGN Sports Center">
-            <img src="/CGNSportsCenterIcon01.png" class="sports-center-icon" alt="">
+            <img src="https://www.cgnnews.net/CGNSportsCenterIcon01.png" class="sports-center-icon" alt="">
             <span class="sports-center-text">Sports</span>
           </a>
 
@@ -882,7 +880,7 @@ function getShellLoginInput_(id){
             </svg>
           </a>
 
-          <a id="cgn-ios-app-desktop-link" class="cgn-ios-app-desktop-link" href="/ios/" aria-label="Get the CGN NOW iOS app">
+          <a id="cgn-ios-app-desktop-link" class="cgn-ios-app-desktop-link" href="https://www.cgnnews.net/ios/" aria-label="Get the CGN NOW iOS app">
             <span class="cgn-ios-app-phone" aria-hidden="true">
               <span class="cgn-ios-app-notch"></span>
               <span class="cgn-ios-app-word">iOS</span>
@@ -894,7 +892,7 @@ function getShellLoginInput_(id){
 
         </div>
 
-        <a id="cgn-ios-app-mobile-link" class="cgn-ios-app-mobile-link" href="/ios/" aria-label="Get the CGN NOW iOS app">
+        <a id="cgn-ios-app-mobile-link" class="cgn-ios-app-mobile-link" href="https://www.cgnnews.net/ios/" aria-label="Get the CGN NOW iOS app">
           <span class="cgn-ios-app-phone" aria-hidden="true">
             <span class="cgn-ios-app-notch"></span>
             <span class="cgn-ios-app-word">iOS</span>
@@ -908,7 +906,7 @@ function getShellLoginInput_(id){
       <div class="ticker" id="cgn-shell-ticker"><a href="/news/">Loading headlines...</a></div>
 
       <section class="market-ticker-wrap" aria-label="CGN Market Watch live stock ticker">
-        <a class="market-ticker-click" href="/news/?category=Markets" aria-label="Open CGN Market Watch">Open CGN Market Watch</a>
+        <a class="market-ticker-click" href="https://www.cgnnews.net/category/markets/market-watch/" aria-label="Open CGN Market Watch">Open CGN Market Watch</a>
         <div class="market-ticker-live">
           <span class="market-ticker-label">Market Watch</span>
           <div class="market-tv-ticker cgn-shell-market-tv" aria-hidden="true">
@@ -1003,7 +1001,7 @@ function getShellLoginInput_(id){
         <div class="footer-container">
 
           <div>
-            <a href="/"><img src="/CGNNewsLogo01.png" class="footer-logo" alt="CGN News"></a>
+            <a href="https://www.cgnnews.net/"><img src="https://www.cgnnews.net/CGNNewsLogo01.png" class="footer-logo" alt="CGN News"></a>
             <p>Real-Time News.<br>Global Perspective.</p>
           </div>
 
@@ -1020,7 +1018,7 @@ function getShellLoginInput_(id){
           </div>
 
           <div class="footer-link-column">
-            <h4><a href="/reporters">Reporters</a></h4>
+            <h4><a href="https://www.cgnnews.net/reporters/">Reporters</a></h4>
             <a href="/news/?category=Special%20Reports">Special Reports</a><br>
             <a href="/news/?category=Entertainment">Entertainment</a><br>
             <a href="/news/?category=Environment">Environment</a><br>
@@ -1032,19 +1030,19 @@ function getShellLoginInput_(id){
           </div>
 
           <div class="footer-legal-links">
-            <h4><a href="/editorial-standards">Editorial Standards</a></h4>
-            <a href="/about">About Us</a><br>
-            <a href="/contact">Contact Us</a><br>
-            <a href="/terms-of-service">Terms of Service</a><br>
-            <a href="/privacy-policy">Privacy Policy</a><br>
+            <h4><a href="https://www.cgnnews.net/editorial-standards/">Editorial Standards</a></h4>
+            <a href="https://www.cgnnews.net/about/">About Us</a><br>
+            <a href="https://www.cgnnews.net/contact/">Contact Us</a><br>
+            <a href="https://www.cgnnews.net/terms-of-service/">Terms of Service</a><br>
+            <a href="https://www.cgnnews.net/privacy-policy/">Privacy Policy</a><br>
             <a href="mailto:tips@cgnnews.net?subject=RE%3A%20Tip">Submit a Tip</a><br>
-            <a href="/write-for-us">Write For Us</a><br>
-            <a href="/advertise">Advertise With Us</a><br>
-            <a href="/copyright">Copyright</a><br>
+            <a href="https://www.cgnnews.net/write-for-us/">Write For Us</a><br>
+            <a href="https://www.cgnnews.net/advertise/">Advertise With Us</a><br>
+            <a href="https://www.cgnnews.net/copyright/">Copyright</a><br>
           </div>
 
           <div class="footer-bureau">
-            <h4><a href="/bureaus">Bureaus</a></h4>
+            <h4><a href="https://www.cgnnews.net/bureaus/">Bureaus</a></h4>
             <p class="footer-bureau-name">Cook Global News Network</p>
             <p>151 N. Delaware Street<br>Suite 122<br>Indianapolis, IN 46204</p>
             <p><a href="mailto:tips@cgnnews.net">tips@cgnnews.net</a><br>+1 (317) 442-1437</p>
@@ -1054,7 +1052,7 @@ function getShellLoginInput_(id){
         </div>
 
         <div class="footer-eo-block" aria-label="Equal Opportunity Employer notice">
-          <p class="footer-eo-title"><a href="/equal-opportunity/">EQUAL OPPORTUNITY EMPLOYER</a></p>
+          <p class="footer-eo-title"><a href="https://www.cgnnews.net/equal-opportunity/">EQUAL OPPORTUNITY EMPLOYER</a></p>
           <div class="footer-eo-copy">
             <p class="footer-eo-policy">CGN News is an equal opportunity employer, and does not discriminate on the basis of race, sex, religion, color, national origin, gender identity, pregnancy status, disability status, veteran status or any other protected category as defined by law, and in accordance with the Civil Rights Act of 1964, as amended, Americans with Disabilities Act of 1990, as amended, the Vietnam Era Veterans’ Readjustment Assistance Act of 1974, as amended, Uniformed Services Employment &amp; Reemployment Rights Act of 1994, as amended, and the Rehabilitation Act of 1973, as amended.</p>
             <p class="footer-eo-reporting">If you believe you have experienced discrimination in the employment process, you may contact the Equal Employment Opportunity Commission by visiting <a href="https://www.eeoc.gov" target="_blank" rel="noopener">www.eeoc.gov</a> or by mail at: 131 M Street, NE, Washington, D.C., 20507 or, for IN, KY, and MI applicants and employees: 115 W. Washington Street, South Tower, Suite 600, Indianapolis, IN 46204.</p>
@@ -1063,11 +1061,11 @@ function getShellLoginInput_(id){
         </div>
 
         <div class="footer-utility-links">
-          <p><a href="/unsubscribe">Unsubscribe From Newsletter</a></p>
+          <p><a href="https://www.cgnnews.net/unsubscribe/">Unsubscribe From Newsletter</a></p>
         </div>
 
         <div class="footer-bottom">
-          <a href="/copyright">Copyright © 2026 | CGN News — All Rights Reserved</a>
+          <a href="https://www.cgnnews.net/copyright/">Copyright © 2026 | CGN News — All Rights Reserved</a>
         </div>
 
       </footer>
