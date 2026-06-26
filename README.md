@@ -1,15 +1,15 @@
 [README.md](https://github.com/user-attachments/files/29233543/README.md)
 <img src="CGNNewsLogo01.png" alt="CGN News" width="240">
 
-# CGN Archives v1.0.0 Alpha
+# CGN Archives v1.1.0 Alpha
 
 **Plain-English + Technical README / Operating Manual**  
 Live Sheet Archives | Read-Only Archive Site | Manual Article Indexing | News Archives | Weather Archives | Sports Archives | Search | Year Filters | Category Filters | Load More | SEO | Sitemaps | Robots | GitHub Pages | Apps Script Web App | Static Article Routes | 404 Article Runtime | Archive Article Runtime | Manual Workflow Dispatch
 
-**Updated:** 23 June 2026 • 04:21:58Z UTC  
-**Archive Build Stamp:** 23 June 2026 • 04:21:58Z UTC | Developed by Cook Technology Services  
-**Archive Version:** `CGN ARCHIVES v1.0.0 Alpha`  
-**Archive Slug:** `cgn-archives-v1.0.0-alpha`  
+**Updated:** 25 June 2026 • 19:43:00Z UTC
+**Archive Build Stamp:** 25 June 2026 • 19:43:00Z UTC | Developed by Cook Technology Services  
+**Archive Version:** `CGN ARCHIVES v1.1.0 Alpha`  
+**Archive Slug:** `cgn-archives-v1.1.0-alpha`  
 **Repository:** `CookInternational/CGN-Archives`  
 **Site:** https://archives.cgnnews.net
 
@@ -21,9 +21,9 @@ tips@cgnnews.net | www.cgnnews.net | +1 (317) 442-1437 | Copyright © 2026 | CGN
 
 ---
 
-## What's Changed in v1.0.0 Alpha?
+## What's Changed in v1.1.0 Alpha?
 
-v1.0.0 Alpha locks the CGN Archives repository as the public read-only archive website for CGN News.
+v1.1.0 Alpha Updated global header to add CGN NOW mobile iOS icon. locks the CGN Archives repository as the public read-only archive website for CGN News.
 
 The archive site serves `https://archives.cgnnews.net` and reads the canonical CGN Archives Google Sheet through the deployed CGN Apps Script Web App. The repository does not write to the Archives Sheet, does not edit article rows, does not timestamp archive records, does not publish or unpublish records, and does not mutate the archive source of truth.
 
@@ -47,7 +47,7 @@ This build also locks physical article-page indexing as a **manual-only** workfl
 
 ## 1. Executive Summary
 
-CGN Archives v1.0.0 Alpha is the public long-term archive website for CGN News.
+CGN Archives v1.1.0 Alpha is the public long-term archive website for CGN News.
 
 Plain-English explanation: readers can browse archived CGN News, Weather, and Sports articles at `archives.cgnnews.net`. The archive pages ask the CGN backend for the current archive records from the Archives Sheet. The public website is read-only and does not change the Sheet.
 
@@ -61,8 +61,8 @@ Technical explanation: the archive site is a GitHub Pages-hosted static frontend
 |---|---|
 | Archive repository | `CookInternational/CGN-Archives` |
 | Production site | `https://archives.cgnnews.net` |
-| Archive version | `CGN ARCHIVES v1.0.0 Alpha` |
-| Archive slug | `cgn-archives-v1.0.0-alpha` |
+| Archive version | `CGN ARCHIVES v1.1.0 Alpha` |
+| Archive slug | `cgn-archives-v1.1.0-alpha` |
 | Archive build stamp | `2026-06-23T04:21:58Z` |
 | README updated | `23 June 2026 • 04:21:58Z UTC` |
 | Source of truth | CGN Archives Google Sheet |
@@ -349,7 +349,7 @@ Do not add scheduled publishing unless the archive indexing policy is explicitly
 
 The build is acceptable when:
 
-- README shows `CGN Archives v1.0.0 Alpha` as the current archive build.
+- README shows `CGN Archives v1.1.0 Alpha` as the current archive build.
 - README updated timestamp is `23 June 2026 • 04:21:58Z UTC`.
 - Archive build stamp matches `2026-06-23T04:21:58Z`.
 - Repository is `CookInternational/CGN-Archives`.
@@ -376,7 +376,7 @@ The build is acceptable when:
 
 ---
 
-## 15. File Inventory for v1.0.0 Alpha
+## 15. File Inventory for v1.1.0 Alpha
 
 | File or directory | Status |
 |---|---|
@@ -470,6 +470,6 @@ Check `sitemap.xml`, `news-sitemap.xml`, `robots.txt`, and the manual indexing w
 
 ---
 
-Last Updated on 23 June 2026 • 04:21:58Z UTC | Developed by Cook Technology Services  
+Last Updated on 25 June 2026 • 19:43:00Z UTC | Developed by Cook Technology Services  
 Copyright © 2026 | CGN News/Cook Global News Network. All Rights Reserved.  
-End of README - CGN Archives v1.0.0 Alpha
+End of README - CGN Archives v1.1.0 Alpha
