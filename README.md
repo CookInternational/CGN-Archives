@@ -1,15 +1,15 @@
 [README.md](https://github.com/user-attachments/files/29233543/README.md)
 <img src="CGNNewsLogo01.png" alt="CGN News" width="240">
 
-# CGN Archives v1.1.0 Alpha
+# CGN Archives v1.2.0 Alpha
 
 **Plain-English + Technical README / Operating Manual**  
 Live Sheet Archives | Read-Only Archive Site | Manual Article Indexing | News Archives | Weather Archives | Sports Archives | Search | Year Filters | Category Filters | Load More | SEO | Sitemaps | Robots | GitHub Pages | Apps Script Web App | Static Article Routes | 404 Article Runtime | Archive Article Runtime | Manual Workflow Dispatch
 
-**Updated:** 25 June 2026 • 19:43:00Z UTC
-**Archive Build Stamp:** 25 June 2026 • 19:43:00Z UTC | Developed by Cook Technology Services  
-**Archive Version:** `CGN ARCHIVES v1.1.0 Alpha`  
-**Archive Slug:** `cgn-archives-v1.1.0-alpha`  
+**Updated:** 26 June 2026 • 18:34:40Z UTC
+**Archive Build Stamp:** 26 June 2026 • 18:34:40Z UTC | Developed by Cook Technology Services  
+**Archive Version:** `CGN ARCHIVES v1.2.0 Alpha`  
+**Archive Slug:** `cgn-archives-v1.2.0-alpha`  
 **Repository:** `CookInternational/CGN-Archives`  
 **Site:** https://archives.cgnnews.net
 
@@ -20,6 +20,10 @@ Indianapolis, IN 46204
 tips@cgnnews.net | www.cgnnews.net | +1 (317) 442-1437 | Copyright © 2026 | CGN News/Cook Global News Network | All Rights Reserved.
 
 ---
+
+## What's Changed in v1.2.0 Alpha?
+
+v1.2.0 Alpha updated the global header shell to match www.cgnnews.net.
 
 ## What's Changed in v1.1.0 Alpha?
 
@@ -470,6 +474,6 @@ Check `sitemap.xml`, `news-sitemap.xml`, `robots.txt`, and the manual indexing w
 
 ---
 
-Last Updated on 25 June 2026 • 19:43:00Z UTC | Developed by Cook Technology Services  
+Last Updated on 26 June 2026 • 18:34:40Z UTC | Developed by Cook Technology Services  
 Copyright © 2026 | CGN News/Cook Global News Network. All Rights Reserved.  
-End of README - CGN Archives v1.1.0 Alpha
+End of README - CGN Archives v1.2.0 Alpha
